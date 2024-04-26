@@ -1,94 +1,70 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const [squares, setSquares] = useState(Array(10).fill(""));
+  const [stack, setStack] = useState<
+    { type: string; index: number; previousValue: string }[]
+  >([]);
+  const [numbers, setNumbers] = useState(Array.from({ length: stack.length }));
+
+  const onBackButtonClick = () => {
+    const lastAction = stack.pop();
+
+    if (!lastAction) {
+      return alert("no action");
+    }
+    const newSquares = [...squares];
+
+    newSquares[lastAction.index] = lastAction.previousValue;
+
+    if (lastAction.index > -1) {
+      numbers.splice(lastAction.index, 1); // 2nd parameter means remove one item only
+    }
+    const newNumbers = stack.map((action) => action.index);
+
+    setSquares(newSquares);
+    setNumbers(newNumbers);
+  };
+
+  const onSquareClick = (index: number) => {
+    const newSquares = [...squares];
+    let newStack = [...stack];
+    if (newSquares[index] === "x") {
+      newSquares[index] = "";
+      newStack.push({ type: "toggle", index, previousValue: "x" });
+    } else {
+      newSquares[index] = "x";
+      newStack.push({ type: "toggle", index, previousValue: "" });
+    }
+    numbers.push(index);
+    setSquares(newSquares);
+    setStack(newStack);
+    setNumbers(numbers);
+  };
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <button className={styles.backButton} onClick={onBackButtonClick}>
+        GERİ AL
+      </button>
+
+      <div className={styles.squareContainer}>
+        {squares.map((value, index) => (
+          <div
+            key={index}
+            className={styles.square}
+            onClick={() => onSquareClick(index)}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+            {value}
+          </div>
+        ))}
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div>
+        {numbers.map((index) => (
+          <div onClick={() => onSquareClick}>{Number(index) + 1}</div>
+        ))}
       </div>
     </main>
   );
